@@ -6,9 +6,15 @@
         xmlns:local="clr-namespace:PhotoHexEditor.App"
         mc:Ignorable="d"
         Title="Photo Hexadecimal Editor" Height="600" Width="900">
+    <Window.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" />
+        <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" />
+    </Window.InputBindings>
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8">
             <Button x:Name="OpenButton" Content="Open..." Padding="8,4" Click="OpenButton_Click" />
+            <Button Content="Undo" Padding="8,4" Margin="8,0,0,0" Command="{Binding UndoCommand}" />
+            <Button Content="Redo" Padding="8,4" Margin="4,0,0,0" Command="{Binding RedoCommand}" />
             <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="12,0,0,0" />
         </StackPanel>
         <ItemsControl ItemsSource="{Binding HexGrid.Rows}"
@@ -43,7 +49,15 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding}" Width="22" />
+                                    <TextBox Text="{Binding Text, Mode=OneWay}"
+                                             Width="22"
+                                             MaxLength="2"
+                                             BorderThickness="0"
+                                             Background="Transparent"
+                                             IsReadOnly="{Binding IsReadOnly}"
+                                             PreviewTextInput="HexCell_PreviewTextInput"
+                                             LostFocus="HexCell_LostFocus"
+                                             KeyDown="HexCell_KeyDown" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
