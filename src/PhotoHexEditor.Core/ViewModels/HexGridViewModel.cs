@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PhotoHexEditor.Core.Model;
 
@@ -6,7 +7,7 @@ namespace PhotoHexEditor.Core.ViewModels;
 public partial class HexGridViewModel : ObservableObject
 {
     [ObservableProperty]
-    private IReadOnlyList<HexRowViewModel> _rows = [];
+    private ObservableCollection<HexRowViewModel> _rows = [];
 
     public void Load(ByteBuffer buffer)
     {
@@ -18,6 +19,17 @@ public partial class HexGridViewModel : ObservableObject
             rows.Add(new HexRowViewModel(offset, buffer));
         }
 
-        Rows = rows;
+        // Construct via the IEnumerable<T> constructor so this is a single assignment
+        // (one PropertyChanged) rather than N individual CollectionChanged events.
+        Rows = new ObservableCollection<HexRowViewModel>(rows);
+    }
+
+    public void RefreshRow(int offset, ByteBuffer buffer)
+    {
+        var rowIndex = offset / HexRowViewModel.BytesPerRow;
+        if (rowIndex < 0 || rowIndex >= Rows.Count) return;
+
+        var rowOffset = rowIndex * HexRowViewModel.BytesPerRow;
+        Rows[rowIndex] = new HexRowViewModel(rowOffset, buffer);
     }
 }

@@ -13,8 +13,9 @@ public class HexRowViewModelTests
         var row = new HexRowViewModel(0, buffer);
 
         Assert.Equal("00000000", row.OffsetText);
-        Assert.Equal("00", row.HexBytes[0]);
-        Assert.Equal("0F", row.HexBytes[15]);
+        Assert.Equal("00", row.HexBytes[0].Text);
+        Assert.Equal("0F", row.HexBytes[15].Text);
+        Assert.True(row.HexBytes[15].IsValid);
         Assert.Equal(16, row.AsciiText.Length);
     }
 
@@ -25,10 +26,12 @@ public class HexRowViewModelTests
 
         var row = new HexRowViewModel(0, buffer);
 
-        Assert.Equal("41", row.HexBytes[0]);
-        Assert.Equal("42", row.HexBytes[1]);
-        Assert.Equal("43", row.HexBytes[2]);
-        Assert.Equal(string.Empty, row.HexBytes[3]);
+        Assert.Equal("41", row.HexBytes[0].Text);
+        Assert.Equal("42", row.HexBytes[1].Text);
+        Assert.Equal("43", row.HexBytes[2].Text);
+        Assert.Equal(string.Empty, row.HexBytes[3].Text);
+        Assert.False(row.HexBytes[3].IsValid);
+        Assert.True(row.HexBytes[3].IsReadOnly);
         Assert.Equal("ABC", row.AsciiText);
     }
 
@@ -67,5 +70,20 @@ public class HexGridViewModelTests
         vm.Load(new ByteBuffer([]));
 
         Assert.Empty(vm.Rows);
+    }
+
+    [Fact]
+    public void RefreshRow_UpdatesOnlyTheAffectedRow()
+    {
+        var buffer = new ByteBuffer(new byte[35]);
+        var vm = new HexGridViewModel();
+        vm.Load(buffer);
+        var untouchedRow = vm.Rows[0];
+
+        buffer.WriteByte(17, 0xAB);
+        vm.RefreshRow(17, buffer);
+
+        Assert.Same(untouchedRow, vm.Rows[0]);
+        Assert.Equal("AB", vm.Rows[1].HexBytes[1].Text);
     }
 }
