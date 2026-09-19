@@ -1,2 +1,7 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PhotoHexEditor.App/PhotoHexEditor.App.csproj" />
+    <Project Path="src/PhotoHexEditor.Core/PhotoHexEditor.Core.csproj" />
+    <Project Path="src/PhotoHexEditor.Tests/PhotoHexEditor.Tests.csproj" />
+  </Folder>
 </Solution>
