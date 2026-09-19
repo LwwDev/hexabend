@@ -14,6 +14,7 @@ public partial class MainViewModel : ObservableObject
     private string _statusText = "No file open";
 
     public HexGridViewModel HexGrid { get; } = new();
+    public PreviewViewModel Preview { get; } = new();
 
     [RelayCommand]
     private void Load(string filePath)
@@ -22,6 +23,7 @@ public partial class MainViewModel : ObservableObject
         Document = doc;
         StatusText = $"{Path.GetFileName(filePath)} — {doc.Format} — {doc.Buffer.Length:N0} bytes";
         HexGrid.Load(doc.Buffer);
+        RequestPreviewDecode();
         UndoCommand.NotifyCanExecuteChanged();
         RedoCommand.NotifyCanExecuteChanged();
     }
@@ -35,6 +37,7 @@ public partial class MainViewModel : ObservableObject
 
         Document.History.Execute(new WriteByteCommand(offset, oldValue, value), Document.Buffer);
         HexGrid.RefreshRow(offset, Document.Buffer);
+        RequestPreviewDecode();
         UndoCommand.NotifyCanExecuteChanged();
         RedoCommand.NotifyCanExecuteChanged();
     }
@@ -46,6 +49,7 @@ public partial class MainViewModel : ObservableObject
 
         Document.History.Undo(Document.Buffer);
         HexGrid.Load(Document.Buffer);
+        RequestPreviewDecode();
         UndoCommand.NotifyCanExecuteChanged();
         RedoCommand.NotifyCanExecuteChanged();
     }
@@ -59,9 +63,16 @@ public partial class MainViewModel : ObservableObject
 
         Document.History.Redo(Document.Buffer);
         HexGrid.Load(Document.Buffer);
+        RequestPreviewDecode();
         UndoCommand.NotifyCanExecuteChanged();
         RedoCommand.NotifyCanExecuteChanged();
     }
 
     private bool CanRedo() => Document?.History.CanRedo ?? false;
+
+    private void RequestPreviewDecode()
+    {
+        if (Document is null) return;
+        Preview.RequestDecode(Document.Buffer.ToArray());
+    }
 }

@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PhotoHexEditor.App"
         mc:Ignorable="d"
-        Title="Photo Hexadecimal Editor" Height="600" Width="900">
+        Title="Photo Hexadecimal Editor" Height="600" Width="1100">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" />
         <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" />
@@ -17,54 +20,81 @@
             <Button Content="Redo" Padding="8,4" Margin="4,0,0,0" Command="{Binding RedoCommand}" />
             <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="12,0,0,0" />
         </StackPanel>
-        <ItemsControl ItemsSource="{Binding HexGrid.Rows}"
-                      ScrollViewer.CanContentScroll="True"
-                      VirtualizingPanel.IsVirtualizing="True"
-                      VirtualizingPanel.VirtualizationMode="Recycling"
-                      VirtualizingPanel.ScrollUnit="Item"
-                      FontFamily="Consolas"
-                      FontSize="13"
-                      Margin="8">
-            <ItemsControl.Template>
-                <ControlTemplate TargetType="ItemsControl">
-                    <ScrollViewer>
-                        <ItemsPresenter />
-                    </ScrollViewer>
-                </ControlTemplate>
-            </ItemsControl.Template>
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding OffsetText}" Width="80" />
-                        <ItemsControl ItemsSource="{Binding HexBytes}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBox Text="{Binding Text, Mode=OneWay}"
-                                             Width="22"
-                                             MaxLength="2"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             IsReadOnly="{Binding IsReadOnly}"
-                                             PreviewTextInput="HexCell_PreviewTextInput"
-                                             LostFocus="HexCell_LostFocus"
-                                             KeyDown="HexCell_KeyDown" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock Text="{Binding AsciiText}" Margin="12,0,0,0" />
-                    </StackPanel>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <ItemsControl Grid.Column="0"
+                          ItemsSource="{Binding HexGrid.Rows}"
+                          ScrollViewer.CanContentScroll="True"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          VirtualizingPanel.ScrollUnit="Item"
+                          FontFamily="Consolas"
+                          FontSize="13"
+                          Margin="8">
+                <ItemsControl.Template>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ScrollViewer>
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding OffsetText}" Width="80" />
+                            <ItemsControl ItemsSource="{Binding HexBytes}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Text, Mode=OneWay}"
+                                                 Width="22"
+                                                 MaxLength="2"
+                                                 BorderThickness="0"
+                                                 Background="Transparent"
+                                                 IsReadOnly="{Binding IsReadOnly}"
+                                                 PreviewTextInput="HexCell_PreviewTextInput"
+                                                 LostFocus="HexCell_LostFocus"
+                                                 KeyDown="HexCell_KeyDown" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="{Binding AsciiText}" Margin="12,0,0,0" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" Background="LightGray" />
+
+            <Grid Grid.Column="2" Margin="8">
+                <Border BorderBrush="Gray" BorderThickness="1">
+                    <Image Source="{Binding Preview.CurrentPreview}" Stretch="Uniform" />
+                </Border>
+                <Border Background="#CC330000"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Stretch"
+                        Padding="6,4"
+                        Visibility="{Binding Preview.HasDecodeError, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Can't decode current bytes — showing last good preview"
+                               Foreground="White"
+                               TextWrapping="Wrap"
+                               FontSize="12" />
+                </Border>
+            </Grid>
+        </Grid>
     </DockPanel>
 </Window>
