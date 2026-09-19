@@ -1,3 +1,4 @@
+using System.IO;
 using PhotoHexEditor.Core.Formats;
 
 namespace PhotoHexEditor.Core.Model;
