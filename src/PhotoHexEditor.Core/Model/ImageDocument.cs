@@ -7,6 +7,7 @@ public sealed class ImageDocument
     public ByteBuffer Buffer { get; }
     public string FilePath { get; }
     public ImageFormatKind Format { get; }
+    public EditHistory History { get; } = new();
     public bool IsDirty { get; private set; }
 
     public ImageDocument(string filePath, byte[] data)
