@@ -25,6 +25,8 @@ Click "Open...", pick an image, edit hex bytes directly in the grid. The preview
 
 `Ctrl+Z` / `Ctrl+Y` to undo/redo edits.
 
+Nothing autosaves — edits only live in memory until you hit "Save As...", which writes the glitched bytes out to a new file (defaults to `{name}_glitched{ext}`, never overwrites your original). Close the app without saving and your edits are gone.
+
 ## project layout
 
 ```
