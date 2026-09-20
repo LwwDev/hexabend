@@ -16,6 +16,7 @@
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8">
             <Button x:Name="OpenButton" Content="Open..." Padding="8,4" Click="OpenButton_Click" />
+            <Button x:Name="SaveButton" Content="Save As..." Padding="8,4" Margin="4,0,0,0" Click="SaveButton_Click" />
             <Button Content="Undo" Padding="8,4" Margin="8,0,0,0" Command="{Binding UndoCommand}" />
             <Button Content="Redo" Padding="8,4" Margin="4,0,0,0" Command="{Binding RedoCommand}" />
             <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="12,0,0,0" />

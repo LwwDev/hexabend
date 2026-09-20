@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,6 +31,24 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog(this) == true)
         {
             _viewModel.LoadCommand.Execute(dialog.FileName);
+        }
+    }
+
+    private void SaveButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel.Document is null) return;
+
+        var suggested = _viewModel.SuggestedSaveFileName;
+        var dialog = new SaveFileDialog
+        {
+            FileName = Path.GetFileName(suggested),
+            InitialDirectory = Path.GetDirectoryName(suggested),
+            Filter = "Image files (*.bmp;*.jpg;*.jpeg;*.png)|*.bmp;*.jpg;*.jpeg;*.png|All files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog(this) == true)
+        {
+            _viewModel.SaveAs(dialog.FileName);
         }
     }
 

@@ -24,4 +24,6 @@ public sealed class ImageDocument
         var data = File.ReadAllBytes(filePath);
         return new ImageDocument(filePath, data);
     }
+
+    public void MarkSaved() => IsDirty = false;
 }

@@ -1,3 +1,4 @@
+using System.IO;
 using PhotoHexEditor.Core.Model;
 using PhotoHexEditor.Core.ViewModels;
 
@@ -65,5 +66,59 @@ public class MainViewModelTests
         vm.CommitByteEdit(0, 0x42);
 
         Assert.False(vm.UndoCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void SuggestedSaveFileName_AppendsGlitchedSuffixBeforeExtension()
+    {
+        var vm = new MainViewModel { Document = new ImageDocument(@"C:\photos\cat.bmp", [0x00]) };
+
+        Assert.EndsWith("cat_glitched.bmp", vm.SuggestedSaveFileName);
+    }
+
+    [Fact]
+    public void SaveAs_WritesCurrentBufferToDisk_AndClearsDirtyFlag()
+    {
+        var tempSource = Path.GetTempFileName();
+        var tempTarget = Path.GetTempFileName();
+        try
+        {
+            var vm = CreateWithDocument([0x00, 0x00]);
+            vm.CommitByteEdit(0, 0xAB);
+
+            vm.SaveAs(tempTarget);
+
+            Assert.Equal([0xAB, 0x00], File.ReadAllBytes(tempTarget));
+            Assert.False(vm.Document!.IsDirty);
+        }
+        finally
+        {
+            File.Delete(tempSource);
+            File.Delete(tempTarget);
+        }
+    }
+
+    [Fact]
+    public void SaveAs_DoesNotTouchOriginalSourceFile()
+    {
+        var tempSource = Path.GetTempFileName();
+        var tempTarget = tempSource + "_glitched";
+        try
+        {
+            File.WriteAllBytes(tempSource, [0x11, 0x22]);
+            var vm = new MainViewModel();
+            vm.LoadCommand.Execute(tempSource);
+
+            vm.CommitByteEdit(0, 0x99);
+            vm.SaveAs(tempTarget);
+
+            Assert.Equal([0x11, 0x22], File.ReadAllBytes(tempSource));
+            Assert.Equal([0x99, 0x22], File.ReadAllBytes(tempTarget));
+        }
+        finally
+        {
+            File.Delete(tempSource);
+            if (File.Exists(tempTarget)) File.Delete(tempTarget);
+        }
     }
 }

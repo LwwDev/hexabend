@@ -75,4 +75,25 @@ public partial class MainViewModel : ObservableObject
         if (Document is null) return;
         Preview.RequestDecode(Document.Buffer.ToArray());
     }
+
+    public string SuggestedSaveFileName
+    {
+        get
+        {
+            if (Document is null) return "glitched.bin";
+
+            var directory = Path.GetDirectoryName(Document.FilePath) ?? string.Empty;
+            var name = Path.GetFileNameWithoutExtension(Document.FilePath);
+            var extension = Path.GetExtension(Document.FilePath);
+            return Path.Combine(directory, $"{name}_glitched{extension}");
+        }
+    }
+
+    public void SaveAs(string filePath)
+    {
+        if (Document is null) return;
+
+        File.WriteAllBytes(filePath, Document.Buffer.ToArray());
+        Document.MarkSaved();
+    }
 }
