@@ -84,4 +84,46 @@ public partial class MainWindow : Window
             textBox.Text = cell.Text;
         }
     }
+
+    private void GoToOffsetButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryParseOffset(GoToOffsetBox.Text, out var offset)) return;
+
+        if (_viewModel.GoToOffset(offset))
+        {
+            ScrollToOffset(offset);
+        }
+    }
+
+    private void FindNextButton_Click(object sender, RoutedEventArgs e)
+    {
+        var query = SearchBox.Text;
+        if (string.IsNullOrEmpty(query)) return;
+
+        var offset = _viewModel.FindNext(query, SearchHexCheckBox.IsChecked == true);
+        if (offset is null)
+        {
+            SearchStatusText.Text = "No matches";
+            return;
+        }
+
+        SearchStatusText.Text = $"@ 0x{offset:X}";
+        ScrollToOffset(offset.Value);
+    }
+
+    private void ScrollToOffset(int offset)
+    {
+        var rowIndex = offset / HexRowViewModel.BytesPerRow;
+        if (rowIndex < 0 || rowIndex >= _viewModel.HexGrid.Rows.Count) return;
+
+        HexRowsList.ScrollIntoView(_viewModel.HexGrid.Rows[rowIndex]);
+    }
+
+    private static bool TryParseOffset(string text, out int offset)
+    {
+        var trimmed = text.Trim();
+        if (trimmed.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) trimmed = trimmed[2..];
+
+        return int.TryParse(trimmed, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out offset);
+    }
 }
