@@ -169,4 +169,80 @@ public class MainViewModelTests
 
         Assert.False(vm.GoToOffset(5));
     }
+
+    [Fact]
+    public void SetSelection_NormalizesOrder()
+    {
+        var vm = CreateWithDocument(new byte[10]);
+
+        var result = vm.SetSelection(5, 2);
+
+        Assert.True(result);
+        Assert.Equal(2, vm.SelectionStart);
+        Assert.Equal(5, vm.SelectionEnd);
+    }
+
+    [Fact]
+    public void SetSelection_OutOfBounds_ReturnsFalse()
+    {
+        var vm = CreateWithDocument(new byte[4]);
+
+        Assert.False(vm.SetSelection(0, 10));
+    }
+
+    [Fact]
+    public void FillSelection_WritesValueAcrossRangeAndSupportsUndo()
+    {
+        var vm = CreateWithDocument(new byte[4]);
+        vm.SetSelection(1, 2);
+
+        var applied = vm.FillSelection(0xFF);
+
+        Assert.True(applied);
+        Assert.Equal([0x00, 0xFF, 0xFF, 0x00], vm.Document!.Buffer.ToArray());
+
+        vm.UndoCommand.Execute(null);
+        Assert.Equal([0x00, 0x00, 0x00, 0x00], vm.Document!.Buffer.ToArray());
+    }
+
+    [Fact]
+    public void FillSelection_NoSelection_ReturnsFalse()
+    {
+        var vm = CreateWithDocument(new byte[4]);
+
+        Assert.False(vm.FillSelection(0xFF));
+    }
+
+    [Fact]
+    public void InvertSelection_FlipsBitsInRange()
+    {
+        var vm = CreateWithDocument([0x00, 0xFF]);
+        vm.SetSelection(0, 1);
+
+        vm.InvertSelection();
+
+        Assert.Equal([0xFF, 0x00], vm.Document!.Buffer.ToArray());
+    }
+
+    [Fact]
+    public void ShiftSelection_AddsDeltaModulo256()
+    {
+        var vm = CreateWithDocument([0xFE, 0x00]);
+        vm.SetSelection(0, 1);
+
+        vm.ShiftSelection(3);
+
+        Assert.Equal([0x01, 0x03], vm.Document!.Buffer.ToArray());
+    }
+
+    [Fact]
+    public void RandomizeSelection_WithSeededRandom_WritesBytes()
+    {
+        var vm = CreateWithDocument(new byte[4]);
+        vm.SetSelection(0, 3);
+
+        vm.RandomizeSelection(new Random(1));
+
+        Assert.NotEqual(new byte[4], vm.Document!.Buffer.ToArray());
+    }
 }

@@ -137,4 +137,84 @@ public partial class MainViewModel : ObservableObject
         HexGrid.SetHighlight(offset, Document.Buffer);
         return true;
     }
+
+    [ObservableProperty]
+    private int? _selectionStart;
+
+    [ObservableProperty]
+    private int? _selectionEnd;
+
+    public bool SetSelection(int start, int end)
+    {
+        if (Document is null) return false;
+
+        var length = Document.Buffer.Length;
+        if (start < 0 || end < 0 || start >= length || end >= length) return false;
+
+        var (lo, hi) = start <= end ? (start, end) : (end, start);
+        SelectionStart = lo;
+        SelectionEnd = hi;
+        HexGrid.SetSelection((lo, hi), Document.Buffer);
+        return true;
+    }
+
+    public void ClearSelection()
+    {
+        SelectionStart = null;
+        SelectionEnd = null;
+        if (Document is not null) HexGrid.SetSelection(null, Document.Buffer);
+    }
+
+    public bool FillSelection(byte value) => ApplyToSelection(old => Enumerable.Repeat(value, old.Length).ToArray());
+
+    public bool InvertSelection() => ApplyToSelection(old => old.Select(b => (byte)~b).ToArray());
+
+    public bool ShiftSelection(int delta) => ApplyToSelection(old => old.Select(b => (byte)(b + delta)).ToArray());
+
+    public bool RandomizeSelection(Random? random = null)
+    {
+        var rng = random ?? Random.Shared;
+        return ApplyToSelection(old =>
+        {
+            var bytes = new byte[old.Length];
+            rng.NextBytes(bytes);
+            return bytes;
+        });
+    }
+
+    private bool ApplyToSelection(Func<byte[], byte[]> transform)
+    {
+        if (Document is null || SelectionStart is null || SelectionEnd is null) return false;
+
+        var start = SelectionStart.Value;
+        var length = SelectionEnd.Value - start + 1;
+        var oldBytes = Document.Buffer.GetRange(start, length);
+        var newBytes = transform(oldBytes);
+        return ApplyRangeEdit(start, oldBytes, newBytes);
+    }
+
+    private bool ApplyRangeEdit(int start, byte[] oldBytes, byte[] newBytes)
+    {
+        if (Document is null) return false;
+        if (oldBytes.AsSpan().SequenceEqual(newBytes)) return false;
+
+        Document.History.Execute(new WriteRangeCommand(start, oldBytes, newBytes), Document.Buffer);
+        RefreshGridRange(start, newBytes.Length);
+        RequestPreviewDecode();
+        UndoCommand.NotifyCanExecuteChanged();
+        RedoCommand.NotifyCanExecuteChanged();
+        return true;
+    }
+
+    private void RefreshGridRange(int start, int length)
+    {
+        if (Document is null) return;
+
+        var firstRow = start / HexRowViewModel.BytesPerRow;
+        var lastRow = (start + length - 1) / HexRowViewModel.BytesPerRow;
+        for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++)
+        {
+            HexGrid.RefreshRow(rowIndex * HexRowViewModel.BytesPerRow, Document.Buffer);
+        }
+    }
 }
