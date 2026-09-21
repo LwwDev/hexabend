@@ -27,6 +27,26 @@ Click "Open...", pick an image, edit hex bytes directly in the grid. The preview
 
 Nothing autosaves — edits only live in memory until you hit "Save As...", which writes the glitched bytes out to a new file (defaults to `{name}_glitched{ext}`, never overwrites your original). Close the app without saving and your edits are gone.
 
+### finding your way around the bytes
+
+- **Go to (hex)** jumps straight to a byte offset and highlights it.
+- **Find** searches for a byte pattern — hex (e.g. `FF D8`) or ASCII — and "Find Next" cycles through matches, wrapping around.
+
+### selection + bulk glitch ops
+
+Enter a hex start/end offset and hit "Select" to mark a byte range (it highlights blue in the grid), then:
+
+- **Randomize** — overwrites the range with random bytes
+- **Invert** — flips every bit in the range
+- **Fill** — overwrites the range with one repeated byte value
+- **Shift** — adds a delta (can be negative) to every byte in the range, mod 256
+
+All of these go through undo/redo like a normal edit.
+
+### glitch presets
+
+For BMP and JPEG, the "Apply Preset" dropdown finds the actual pixel/scan data range for you (BMP: past the `bfOffBits` header offset; JPEG: past the first SOS scan marker) and randomizes it — skips the header bytes that would just break decoding. Not offered for PNG/unknown formats since there isn't a reliably glitchable range to target.
+
 ## project layout
 
 ```
