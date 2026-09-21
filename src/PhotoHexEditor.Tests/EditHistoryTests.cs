@@ -27,6 +27,31 @@ public class WriteByteCommandTests
     }
 }
 
+public class WriteRangeCommandTests
+{
+    [Fact]
+    public void Do_WritesNewBytesAtStart()
+    {
+        var buffer = new ByteBuffer([0x00, 0x00, 0x00]);
+        var command = new WriteRangeCommand(1, oldBytes: [0x00, 0x00], newBytes: [0xAA, 0xBB]);
+
+        command.Do(buffer);
+
+        Assert.Equal([0x00, 0xAA, 0xBB], buffer.ToArray());
+    }
+
+    [Fact]
+    public void Undo_RestoresOldBytes()
+    {
+        var buffer = new ByteBuffer([0x00, 0xAA, 0xBB]);
+        var command = new WriteRangeCommand(1, oldBytes: [0x00, 0x00], newBytes: [0xAA, 0xBB]);
+
+        command.Undo(buffer);
+
+        Assert.Equal([0x00, 0x00, 0x00], buffer.ToArray());
+    }
+}
+
 public class EditHistoryTests
 {
     [Fact]
