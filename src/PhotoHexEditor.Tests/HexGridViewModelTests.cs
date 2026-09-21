@@ -44,6 +44,30 @@ public class HexRowViewModelTests
 
         Assert.Equal(".A.", row.AsciiText);
     }
+
+    [Fact]
+    public void HighlightOffset_MarksMatchingCellOnly()
+    {
+        var buffer = new ByteBuffer([0x41, 0x42, 0x43]);
+
+        var row = new HexRowViewModel(0, buffer, highlightOffset: 1);
+
+        Assert.False(row.HexBytes[0].IsHighlighted);
+        Assert.True(row.HexBytes[1].IsHighlighted);
+    }
+
+    [Fact]
+    public void Selection_MarksCellsWithinRange()
+    {
+        var buffer = new ByteBuffer([0x41, 0x42, 0x43, 0x44]);
+
+        var row = new HexRowViewModel(0, buffer, selection: (1, 2));
+
+        Assert.False(row.HexBytes[0].IsSelected);
+        Assert.True(row.HexBytes[1].IsSelected);
+        Assert.True(row.HexBytes[2].IsSelected);
+        Assert.False(row.HexBytes[3].IsSelected);
+    }
 }
 
 public class HexGridViewModelTests
@@ -85,5 +109,47 @@ public class HexGridViewModelTests
 
         Assert.Same(untouchedRow, vm.Rows[0]);
         Assert.Equal("AB", vm.Rows[1].HexBytes[1].Text);
+    }
+
+    [Fact]
+    public void SetHighlight_MarksOnlyThatCell()
+    {
+        var buffer = new ByteBuffer(new byte[20]);
+        var vm = new HexGridViewModel();
+        vm.Load(buffer);
+
+        vm.SetHighlight(17, buffer);
+
+        Assert.True(vm.Rows[1].HexBytes[1].IsHighlighted);
+        Assert.False(vm.Rows[0].HexBytes[0].IsHighlighted);
+    }
+
+    [Fact]
+    public void SetHighlight_ChangingOffset_ClearsPreviousHighlight()
+    {
+        var buffer = new ByteBuffer(new byte[20]);
+        var vm = new HexGridViewModel();
+        vm.Load(buffer);
+        vm.SetHighlight(0, buffer);
+
+        vm.SetHighlight(17, buffer);
+
+        Assert.False(vm.Rows[0].HexBytes[0].IsHighlighted);
+        Assert.True(vm.Rows[1].HexBytes[1].IsHighlighted);
+    }
+
+    [Fact]
+    public void SetSelection_MarksAllCellsInRangeAcrossRows()
+    {
+        var buffer = new ByteBuffer(new byte[20]);
+        var vm = new HexGridViewModel();
+        vm.Load(buffer);
+
+        vm.SetSelection((15, 17), buffer);
+
+        Assert.True(vm.Rows[0].HexBytes[15].IsSelected);
+        Assert.True(vm.Rows[1].HexBytes[0].IsSelected);
+        Assert.True(vm.Rows[1].HexBytes[1].IsSelected);
+        Assert.False(vm.Rows[1].HexBytes[2].IsSelected);
     }
 }

@@ -121,4 +121,52 @@ public class MainViewModelTests
             if (File.Exists(tempTarget)) File.Delete(tempTarget);
         }
     }
+
+    [Fact]
+    public void FindNext_CyclesThroughMatchesAndWraps()
+    {
+        var vm = CreateWithDocument([0x41, 0x00, 0x41, 0x00, 0x41]);
+
+        var first = vm.FindNext("41", isHex: true);
+        var second = vm.FindNext("41", isHex: true);
+        var third = vm.FindNext("41", isHex: true);
+        var fourth = vm.FindNext("41", isHex: true);
+
+        Assert.Equal(0, first);
+        Assert.Equal(2, second);
+        Assert.Equal(4, third);
+        Assert.Equal(0, fourth);
+    }
+
+    [Fact]
+    public void FindNext_NoMatches_ReturnsNull()
+    {
+        var vm = CreateWithDocument([0x00]);
+
+        Assert.Null(vm.FindNext("FF", isHex: true));
+    }
+
+    [Fact]
+    public void FindNext_AsciiQuery_FindsSubstring()
+    {
+        var vm = CreateWithDocument("xxABCxx"u8.ToArray());
+
+        Assert.Equal(2, vm.FindNext("ABC", isHex: false));
+    }
+
+    [Fact]
+    public void GoToOffset_ValidOffset_ReturnsTrue()
+    {
+        var vm = CreateWithDocument([0x00, 0x00, 0x00]);
+
+        Assert.True(vm.GoToOffset(1));
+    }
+
+    [Fact]
+    public void GoToOffset_OutOfRange_ReturnsFalse()
+    {
+        var vm = CreateWithDocument([0x00]);
+
+        Assert.False(vm.GoToOffset(5));
+    }
 }
