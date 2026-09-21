@@ -49,6 +49,15 @@
             <TextBlock Text="Shift:" VerticalAlignment="Center" Margin="12,0,0,0" />
             <TextBox x:Name="ShiftDeltaBox" Width="40" Margin="4,0" VerticalAlignment="Center" Text="1" />
             <Button Content="Shift" Padding="6,2" Click="ShiftButton_Click" />
+
+            <ComboBox x:Name="PresetComboBox"
+                      Width="180"
+                      Margin="16,0,4,0"
+                      VerticalAlignment="Center"
+                      ItemsSource="{Binding AvailablePresets}"
+                      DisplayMemberPath="Name"
+                      ToolTip="{Binding SelectedItem.Description, RelativeSource={RelativeSource Self}}" />
+            <Button Content="Apply Preset" Padding="6,2" Click="ApplyPresetButton_Click" />
         </StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>

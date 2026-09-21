@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Win32;
+using PhotoHexEditor.Core.Formats;
 using PhotoHexEditor.Core.ViewModels;
 
 namespace PhotoHexEditor.App;
@@ -152,6 +153,14 @@ public partial class MainWindow : Window
         if (int.TryParse(ShiftDeltaBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var delta))
         {
             _viewModel.ShiftSelection(delta);
+        }
+    }
+
+    private void ApplyPresetButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (PresetComboBox.SelectedItem is GlitchPreset preset)
+        {
+            _viewModel.ApplyGlitchPreset(preset);
         }
     }
 }
