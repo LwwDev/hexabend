@@ -35,4 +35,6 @@ public sealed class ByteBuffer
     }
 
     public byte[] ToArray() => (byte[])_data.Clone();
+
+    public ReadOnlySpan<byte> AsSpan() => _data;
 }
