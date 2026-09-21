@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PhotoHexEditor.Core.Formats;
 using PhotoHexEditor.Core.Model;
 using PhotoHexEditor.Core.Search;
 
@@ -17,6 +18,10 @@ public partial class MainViewModel : ObservableObject
 
     public HexGridViewModel HexGrid { get; } = new();
     public PreviewViewModel Preview { get; } = new();
+
+    public IReadOnlyList<GlitchPreset> AvailablePresets => Document is null ? [] : GlitchPresetFinder.GetPresets(Document.Format);
+
+    partial void OnDocumentChanged(ImageDocument? value) => OnPropertyChanged(nameof(AvailablePresets));
 
     [RelayCommand]
     private void Load(string filePath)
@@ -216,5 +221,16 @@ public partial class MainViewModel : ObservableObject
         {
             HexGrid.RefreshRow(rowIndex * HexRowViewModel.BytesPerRow, Document.Buffer);
         }
+    }
+
+    public bool ApplyGlitchPreset(GlitchPreset preset, Random? random = null)
+    {
+        if (Document is null) return false;
+
+        var range = GlitchPresetFinder.FindTargetRange(Document.Format, Document.Buffer.ToArray());
+        if (range is null) return false;
+
+        if (!SetSelection(range.Value.Start, range.Value.End)) return false;
+        return RandomizeSelection(random);
     }
 }

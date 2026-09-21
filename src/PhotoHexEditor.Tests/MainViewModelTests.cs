@@ -1,6 +1,8 @@
 using System.IO;
+using System.Linq;
 using PhotoHexEditor.Core.Model;
 using PhotoHexEditor.Core.ViewModels;
+using PhotoHexEditor.Core.Formats;
 
 namespace PhotoHexEditor.Tests;
 
@@ -244,5 +246,50 @@ public class MainViewModelTests
         vm.RandomizeSelection(new Random(1));
 
         Assert.NotEqual(new byte[4], vm.Document!.Buffer.ToArray());
+    }
+
+    [Fact]
+    public void AvailablePresets_Bmp_ReturnsPixelDataPreset()
+    {
+        var vm = CreateWithDocument([(byte)'B', (byte)'M']);
+
+        Assert.Single(vm.AvailablePresets);
+    }
+
+    [Fact]
+    public void AvailablePresets_NoDocument_ReturnsEmpty()
+    {
+        var vm = new MainViewModel();
+
+        Assert.Empty(vm.AvailablePresets);
+    }
+
+    [Fact]
+    public void ApplyGlitchPreset_Bmp_RandomizesPixelDataRangeAndSupportsUndo()
+    {
+        var header = new byte[54];
+        header[0] = (byte)'B';
+        header[1] = (byte)'M';
+        BitConverter.GetBytes((uint)54).CopyTo(header, 10);
+        var pixels = new byte[] { 0x00, 0x00, 0x00, 0x00 };
+        var data = header.Concat(pixels).ToArray();
+        var vm = CreateWithDocument(data);
+
+        var preset = vm.AvailablePresets[0];
+        var applied = vm.ApplyGlitchPreset(preset, new Random(42));
+
+        Assert.True(applied);
+        Assert.NotEqual(pixels, vm.Document!.Buffer.GetRange(54, 4));
+
+        vm.UndoCommand.Execute(null);
+        Assert.Equal(pixels, vm.Document!.Buffer.GetRange(54, 4));
+    }
+
+    [Fact]
+    public void ApplyGlitchPreset_NoDocument_ReturnsFalse()
+    {
+        var vm = new MainViewModel();
+
+        Assert.False(vm.ApplyGlitchPreset(new GlitchPreset("x", "y")));
     }
 }
