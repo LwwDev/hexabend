@@ -126,4 +126,32 @@ public partial class MainWindow : Window
 
         return int.TryParse(trimmed, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out offset);
     }
+
+    private void SelectRangeButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryParseOffset(SelectionStartBox.Text, out var start)) return;
+        if (!TryParseOffset(SelectionEndBox.Text, out var end)) return;
+
+        _viewModel.SetSelection(start, end);
+    }
+
+    private void RandomizeButton_Click(object sender, RoutedEventArgs e) => _viewModel.RandomizeSelection();
+
+    private void InvertButton_Click(object sender, RoutedEventArgs e) => _viewModel.InvertSelection();
+
+    private void FillButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (byte.TryParse(FillValueBox.Text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var value))
+        {
+            _viewModel.FillSelection(value);
+        }
+    }
+
+    private void ShiftButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (int.TryParse(ShiftDeltaBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var delta))
+        {
+            _viewModel.ShiftSelection(delta);
+        }
+    }
 }

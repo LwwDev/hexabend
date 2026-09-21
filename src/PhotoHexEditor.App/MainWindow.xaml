@@ -32,6 +32,24 @@
             <Button Content="Find Next" Padding="6,2" Click="FindNextButton_Click" />
             <TextBlock x:Name="SearchStatusText" VerticalAlignment="Center" Margin="8,0,0,0" />
         </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8,0,8,8">
+            <TextBlock Text="Selection (hex):" VerticalAlignment="Center" />
+            <TextBox x:Name="SelectionStartBox" Width="70" Margin="4,0" VerticalAlignment="Center" />
+            <TextBlock Text="to" VerticalAlignment="Center" />
+            <TextBox x:Name="SelectionEndBox" Width="70" Margin="4,0" VerticalAlignment="Center" />
+            <Button Content="Select" Padding="6,2" Click="SelectRangeButton_Click" />
+
+            <Button Content="Randomize" Padding="6,2" Margin="16,0,0,0" Click="RandomizeButton_Click" />
+            <Button Content="Invert" Padding="6,2" Margin="4,0,0,0" Click="InvertButton_Click" />
+
+            <TextBlock Text="Fill:" VerticalAlignment="Center" Margin="12,0,0,0" />
+            <TextBox x:Name="FillValueBox" Width="30" Margin="4,0" VerticalAlignment="Center" Text="00" />
+            <Button Content="Fill" Padding="6,2" Click="FillButton_Click" />
+
+            <TextBlock Text="Shift:" VerticalAlignment="Center" Margin="12,0,0,0" />
+            <TextBox x:Name="ShiftDeltaBox" Width="40" Margin="4,0" VerticalAlignment="Center" Text="1" />
+            <Button Content="Shift" Padding="6,2" Click="ShiftButton_Click" />
+        </StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
